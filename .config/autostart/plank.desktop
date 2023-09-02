@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Autostart Plank dock
+Exec=/usr/bin/plank
+Icon=/home/pi/pi-apps/icons/logo.png
+Terminal=false
+StartupWMClass=Plank
+Type=Application
+X-GNOME-Autostart-enabled=true
+Hidden=false
+NoDisplay=false

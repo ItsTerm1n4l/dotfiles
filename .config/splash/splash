@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+## Everyone is permitted to copy and distribute copies of this file under GNU-GPL3
+##			made by @ItsTerm1n4l on github
+## A script to get colours from the theme file & deploy it to polybar, alacritty, rofi & dunst.
+##		Frontend for applytheme.sh
+#			Uses COLOUR
+
+DIR="$HOME/.config/splash" #Location of colourschemes
+Help()
+{
+   # Display Help
+   echo "Add description of the script functions here."
+   echo
+   echo "Syntax: splash [-t|p|b|h]"
+   echo "options:"
+   echo "  -t     Choose theme eg. (splash -t gruvbox-material)."
+   echo "  -h     Print this Help."
+   echo "  -b     Set background colour eg. (splash -b 151724)."
+   echo "  -c     Set terminal background colour eg. (splash -c 0d0f17)."
+   echo
+}
+
+# Get the options
+while getopts ":hb:c:t:" option; do
+   case $option in
+      h) # display Help
+         Help
+         exit;;
+      b) # Enter a name
+         CUSTOMBG=${OPTARG};;
+      c)
+	 TERMBG=${OPTARG};;
+      t)
+	THEME=${OPTARG}
+	if [ "$OPTARG" == "/dev/null" ]
+	then
+	echo $(ls -l "$DIR"/colourschemes/ | awk -F"[.]" '{print $1}')
+	else
+	ln -f "$DIR"/colourschemes/"$THEME".bash "$DIR"/colourschemes/current.bash
+	fi;;
+	    \?) # Invalid option
+         echo "Error: Invalid option"
+         exit;;
+   esac
+done
+
+
+
+"$DIR"/settheme.sh -b "$CUSTOMBG" -c "$TERMBG"
+

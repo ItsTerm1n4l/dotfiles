@@ -1,0 +1,291 @@
+(defwindow bar
+          :geometry (geometry :x "0%"
+                       :y "-3px"
+                       :width "98%"
+                       :height "30px"
+                       :anchor "bottom center")
+           :reserve (struts :distance "40px" :side "bottom")
+
+         :stacking "fg"
+          :windowtype "dock"
+(bar_1)		)
+
+(defwindow bar_spacer
+          :geometry (geometry :x "0%"
+                       :y "9px"
+                       :width "2%"
+                       :height "30px"
+                       :anchor "bottom center")
+           :reserve (struts :distance "20px" :side "bottom")
+
+         :stacking "fg"
+          :windowtype "dock"
+(spacer)
+)
+
+(defwidget spacer []
+  (box :class "bar_class"
+       :orientation "h"
+    ))
+(defwidget bar_1 []
+  (box :class "bar_class"
+       :orientation "h"
+  (left)
+  (center)
+  (right)
+    ))
+
+(defwidget left []
+	(box :orientation "h" 
+		 :space-evenly false  
+         :halign "start"
+		 :class "left_modules"
+  (system-png)
+  (sep)
+  (apps-png)
+))
+
+
+(defwidget right []
+	(box :orientation "h" 
+		 :space-evenly false  
+         :halign "end" 
+         :class "right_modules"
+  (unread_emails)
+  (music_info)
+  (volume)
+  (clock_module)
+))
+
+
+(defwidget center []
+	(box :orientation "h" 
+		 :space-evenly false  
+         :halign "center"
+		 :class "center_modules"
+
+))
+;; VARS
+(defvar play_pause "$HOME/.config/eww/scripts/play-pause.sh")
+(defvar music_time "$HOME/.config/eww/scripts/time.sh")
+(defpoll music_info :interval "1s" "$HOME/.config/eww/scripts/time.sh")
+(defvar music_rev false)
+(defvar vol_reveal false)
+(defvar eww "$HOME/.local/bin/eww -c $HOME/.config/eww")
+(defpoll volume_percent :interval "0.5s" "amixer -D pulse sget Master | grep 'Left:' | awk -F'[][]' '{ print $2 }' | tr -d '%'")
+(defpoll clock_time :interval "1m" "date +\%I")
+(defpoll clock_minute :interval "1s" "date +\%M")
+(defvar time_rev false)
+(defpoll clock_date :interval "5m" "date '+%d/%m'")
+(defpoll memory :interval "1s" "scripts/memory")
+(defpoll memory_used_mb :interval "2m" "scripts/mem-ad used")
+(defpoll memory_total_mb :interval "2m" "scripts/mem-ad total")
+(defpoll memory_free_mb :interval "2m" "scripts/mem-ad free")
+
+(defwidget volume []
+  (eventbox :onhover "${eww} update vol_reveal=true"
+			  :onhoverlost "${eww} update vol_reveal=false"
+  (box :class "module-2" :space-evenly "false" :orientation "h" :spacing "5" :valign "center" :halign "center" 
+       (button :style "background-image: url('icons/volume.png');" :class "volumepng"
+             :onclick "scripts/widget_apps --ap")
+	(revealer :transition "slideleft"
+			  :reveal vol_reveal
+              :duration "350ms"
+;;            (label :text "" :class "sep")
+	(scale    :class "volbar"
+			  :value volume_percent
+              :draw-value true
+			  :orientation "h"
+			  :tooltip "Volume: ${volume_percent}%"
+			  :max 100
+			  :min 0
+			  :onchange "amixer -D pulse sset Master {}%" )))))
+
+(defwidget volume-ring []
+  (eventbox :onscroll "scripts/getvol {} ${volume_percent}"
+  (box :class "module-2" :space-evenly "false" :orientation "h" :spacing "5" :valign "center" :halign "center" 
+     (circular-progress :value volume_percent
+                :class "membar"
+                :thickness 4
+    (button :style "background-image: url('icons/volume/mute.png');" :class "systempng"
+             :onclick "scripts/widget_apps --ap")
+
+
+))))
+
+;;(defwidget music []
+;;  (box :class "music"
+;;       :orientation "h"
+;;       :space-evenly false
+;;       :halign "center"
+;;    {music != "" ? "[${music}]${musictime}]" : ""}))
+
+
+(defwidget metric [label value onchange]
+  (box :orientation "h"
+       :class "metric"
+       :space-evenly false
+    (box :class "label" label)
+    (scale :min 0
+           :max 100
+           :active {onchange != ""}
+           :value value
+           :onchange onchange)))
+
+
+(deflisten windo :initial ""
+  "~/.config/eww/scripts/polywins.sh")
+(deflisten musicscroll :initial ""
+  "~/.config/eww/scripts/scroll_spotify_status.sh")
+(deflisten musictitle :initial ""
+ "playerctl metadata --format '{{ artist }} {{ title }}' -F")
+
+(defpoll unreadmailcount :interval "5s"
+ "bar-protonmail -b '' -f polybar")
+(deflisten playpause :initial ""
+"scripts/play-pause.sh")
+(deflisten musictime :initial ""
+"scripts/get_music_time.sh")
+
+(defpoll volume :interval "1s"
+  "scripts/getvol")
+
+(defpoll time :interval "2s"
+  "date '+%H:%M'")
+
+(defwidget sep []
+    (box :class "module" :space-evenly "false" :orientation "h" :spacing "3" 
+      (label :text "" :class "sep")
+
+        )
+  )
+
+(defwidget mem []
+		(box :class "mem_module" :vexpand "false" :hexpand "false" 
+            (circular-progress :value memory
+                :class "membar"
+                :thickness 4
+            (button 
+                :class "iconmem"
+                :limit-width 2
+                :tooltip "using ${memory}% ram"
+                :onclick "$HOME/.config/eww/bar/scripts/pop system"
+                :show_truncated false
+                :wrap false
+                ""))))
+
+(defwidget system-png []
+    (box :space-evenly "false" :orientation "h" :spacing "30" :valign "center" :halign "center"    
+       (button :style "background-image: url('icons/apps.png');" :class "systempng"
+             :onclick "scripts/widget_apps --ap")
+        ) 
+  )
+
+(defwidget vol_icon []
+    (box :space-evenly "false" :orientation "h" :spacing "5" :valign "center" :halign "center"  
+       (button :style "background-image: url('icons/volume/mute.png');" :class "systemicon"
+             :onclick "scripts/widget_apps --ap")
+(eventbox :onscroll "amixer -D pulse sset Master {}%"      	
+  (scale    :class "volbarup"
+			  :value volume_percent
+			  :orientation "v"
+              :flipped true
+			  :tooltip "Volume: ${volume_percent}%"
+			  :max 100
+			  :min 0
+			  :onchange "amixer -D pulse sset Master {}%" ))
+(label :text "${volume_percent}"
+  )
+       ) 
+)  
+
+
+
+(defwidget music_info []
+;;  (eventbox :onhover "${eww} update music_rev=true"
+;;			  :onhoverlost "${eww} update music_rev=false"
+    (box :class "module" :space-evenly "false" :orientation "h" :spacing "3"       
+      (transform :rotate "25" :translate-x "8px" :translate-y "-28px" ;; transform only needed when cap is a glyph
+
+      (label :text "󱁐" 
+       :class "play-pause-cap"))
+      (button 
+             :onclick "playerctl --player=mpv,%any play-pause" 
+         (label :text "${playpause} " 
+              :class "play-pause" ))
+        (label :text "󰽴" 
+             :class "music-mid" )
+      (label :text "${musictime}" 
+             :class "musictime" 
+             :tooltip "󰝚${musictitle}")
+      (transform :rotate "-25" :translate-x "-27px" :translate-y "-10px"
+;; transform only needed when cap is a glyph. alternative 󰊩 needs -12.5px translate-y
+      (label :text "󱁐"
+             :class "music-cap" ))
+      (button :class "musicinfo_class"
+             :onclick "$HOME/.config/eww/bar/scripts/pop calendar"
+        )))
+(defwidget unread_emails []
+			(box :orientation "h" :spacing 15 :valign "center" :halign "center" :space-evenly "false" :vexpand "false" :hexpand "false"   
+      (button :style "background-image: url('icons/protonmail.png');" :class "apppng" :onclick "echo hi"
+      (label :text "${unreadmailcount}" 
+             :class "unreadmail" 
+             :tooltip "There are${unreadmailcount} unread emails in your inbox"))
+        ))
+(defwidget clock_module []
+  (eventbox :onhover "${eww} update time_rev=true"
+			  :onhoverlost "${eww} update time_rev=false"
+    (box :class "module" :space-evenly "false" :orientation "h" :spacing "3" 
+      (label :text "${time} " :class "clock_time" )
+	  (revealer :transition "slideright"
+			  :reveal time_rev
+			  :duration "350ms"
+      (button :class "clock_date"
+             :onclick "$HOME/.config/eww/bar/scripts/pop calendar" "${clock_date}"
+        )
+  ))))
+
+(defwidget apps-png [] 
+		(box :class "dockbox"
+			(box :orientation "h" :spacing 15 :valign "center" :halign "center" :space-evenly "false" :vexpand "false" :hexpand "false"
+				(button :style "background-image: url('icons/terminal.png');" :class "apppng" :onclick "scripts/widget_apps --tr")
+				(button :style "background-image: url('icons/browser.png');" :class "apppng" :onclick "scripts/widget_apps --ff")
+				(button :style "background-image: url('icons/places.png');" :class "apppng" :onclick "scripts/widget_apps --fm")
+				(button :style "background-image: url('icons/system.png');" :class "apppng" :onclick "scripts/widget_apps --ge")
+				(button :style "background-image: url('icons/system2.png');" :class "apppng" :onclick "scripts/widget_apps --dc")
+)))
+
+(defwidget windows []
+  (eventbox :onhover "${eww} update music_rev=true"
+			  :onhoverlost "${eww} update music_rev=false"
+    (box :class "module" :space-evenly "false" :orientation "h" :spacing "3"       
+       (button :class "play-pause_class" 
+             :onclick "playerctl play-pause mpv" 
+         (label :text "${playpause}" ))
+      (label :text "[${windo}]" :class "musictime_class" )
+	  (revealer :transition "slideright"
+			  :reveal music_rev
+			  :duration "350ms"
+      (button :class "musicinfo_class"
+             :onclick "$HOME/.config/eww/bar/scripts/pop calendar" "${musicscroll}"
+        )))))
+
+(defwidget apps [] 
+		(box :class "dockbox"
+			(box :orientation "h" :spacing 15 :valign "center" :halign "center" :space-evenly "false" :vexpand "false" :hexpand "false"
+				(button :class "appicon" :onclick "scripts/widget_apps --tr" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --ff" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --fm" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --ge" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --dc" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --rd" (label :style "font-size: 18;" :text "" ))
+				(button :class "appicon" :onclick "scripts/widget_apps --ff" (label :style "font-size: 18;" :text "" ))
+)))
+
+(defwidget system []
+    (box :space-evenly "false" :orientation "h" :spacing "30" :valign "center" :halign "center"    
+       (button  :class "systemicon" :onclick "scripts/widget_apps --ap"
+		(label :text "" :style "font-size: 18;"
+             
+        ) 
+)))
