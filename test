@@ -1,5 +1,0 @@
-while IFS= read -r string
-do 
-    mkdir ~/Desktop/"${string}"-BACKUP
-    cp -r ~/.config/$string/* ~/Desktop/"${string}"-BACKUP
-done < <(ls ./.config)
