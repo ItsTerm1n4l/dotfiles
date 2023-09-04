@@ -1,9 +1,9 @@
 [Desktop Entry]
-Name=Pi-Apps Updater
-Exec=/home/pi/pi-apps/updater onboot
+Name=Autostart EWW widgets
+Exec=bash -c "$HOME/.local/bin/eww open bar"
 Icon=/home/pi/pi-apps/icons/logo.png
 Terminal=false
-StartupWMClass=Pi-Apps
+StartupWMClass=eww
 Type=Application
 X-GNOME-Autostart-enabled=true
 Hidden=false

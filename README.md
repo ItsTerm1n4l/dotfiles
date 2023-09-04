@@ -23,4 +23,4 @@ based off [lavanda-gtk](https://github.com/vinceliuice/Lavanda-gtk-theme)
 ## Packages
 `xfce-terminal fish nautilus eww plank`
  - Optional   
-`mpv-mpris playerctl youtube-viewer bar-protonmail`
+`mpv mpv-mpris playerctl youtube-viewer bar-protonmail`
