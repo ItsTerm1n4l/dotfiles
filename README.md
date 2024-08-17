@@ -1,3 +1,7 @@
+# Archived Because Outdated
+## Please see my new up-to-date dots [here](https://github.com/ItsTerm1n4l/dotfiles).
+___
+
 # My dotfiles.     
 My personal customization and theming files.   
 ![screenshot with London-night](/assets/screenshot-london-night.png)
